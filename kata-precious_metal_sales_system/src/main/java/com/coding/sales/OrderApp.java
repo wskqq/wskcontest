@@ -26,14 +26,8 @@ import com.coding.sales.service.impl.ProductSaleServiceImpl;
 public class OrderApp {
 
     public static void main(String[] args) {
-//        if (args.length != 2) {
-//            throw new IllegalArgumentException("参数不正确。参数1为销售订单的JSON文件名，参数2为待打印销售凭证的文本文件名.");
-//        }
-
-//        String jsonFileName = args[0];
-//        String txtFileName = args[1];
         String jsonFileName = "sample_command.json";
-        String txtFileName = "sample_result.txt";    	
+        String txtFileName = "src/main/java/com/coding/sales/sample_result.txt";    	
 
         String orderCommand = FileUtils.readFromFile(OrderApp.class.getResource("sample_command.json").getPath());
         OrderApp app = new OrderApp();
@@ -58,7 +52,7 @@ public class OrderApp {
         Map<String, Product> productInfoMap = productInfo.initProductInfo();
         List<Integer> productDiscount = null;
         //商品数量
-        Integer productAmount = 0;
+        BigDecimal amount = BigDecimal.ZERO;
         
         List<OrderItemCommand> productList = command.getItems();
         ProductSaleService productSaleService = new ProductSaleServiceImpl();
@@ -71,14 +65,14 @@ public class OrderApp {
         	//获取商品
         	product = productInfoMap.get(orderItemCommand.getProduct());
         	//获取商品活动
-        	if(productDiscount != null)
-        	productDiscount = product.getProductDiscount();
-        	BigDecimal amount = orderItemCommand.getAmount();
+            productDiscount = product.getProductDiscount();
+        	amount = orderItemCommand.getAmount();
         	
         	BigDecimal totalDecimal = productSaleService.sales(product, amount, productDiscount);
         	totalAmount = totalAmount.add(totalDecimal);
         	totalAmountSum = product.getProductPrice().multiply(amount).add(totalAmountSum);
         	OrderItemRepresentation orderItemRepresentation = new OrderItemRepresentation(String.valueOf(product.getProductId()), product.getProductName(), product.getProductPrice(), amount, product.getProductPrice().multiply(amount));
+        	orderItems.add(orderItemRepresentation);
         }
         
         String memberId = command.getMemberId();
